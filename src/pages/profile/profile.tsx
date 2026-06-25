@@ -32,7 +32,15 @@ export const Profile: FC = () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(updateUser(formValue));
+
+    dispatch(updateUser(formValue))
+      .unwrap()
+      .then(() => {
+        setFormValue((prev) => ({ ...prev, password: '' }));
+      })
+      .catch((error) => {
+        console.error('Ошибка обновления профиля:', error);
+      });
   };
 
   const handleCancel = (e: SyntheticEvent) => {

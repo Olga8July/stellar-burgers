@@ -1,17 +1,37 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient, TOrder } from '@utils-types';
+import { TIngredient } from '@utils-types';
 
-import { useSelector } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
+import { fetchOrderByNumber } from '../../services/slices/currentOrderSlice';
 import {
   selectCurrentOrder,
-  selectIngredients
+  selectCurrentOrderLoading,
+  selectCurrentOrderError,
+  selectIngredients,
+  selectIngredientsLoading,
+  selectIngredientsError
 } from '../../services/selectors/selectors';
 
 export const OrderInfo: FC = () => {
+  const dispatch = useDispatch();
+  const { number } = useParams<{ number: string }>();
+
   const orderData = useSelector(selectCurrentOrder);
+  const orderLoading = useSelector(selectCurrentOrderLoading);
+  const orderError = useSelector(selectCurrentOrderError);
+
   const ingredients = useSelector(selectIngredients);
+  const ingredientsLoading = useSelector(selectIngredientsLoading);
+  const ingredientsError = useSelector(selectIngredientsError);
+
+  useEffect(() => {
+    if (number) {
+      dispatch(fetchOrderByNumber(Number(number)));
+    }
+  }, [dispatch, number]);
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
@@ -54,8 +74,42 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
+  if (orderLoading) {
     return <Preloader />;
+  }
+
+  if (orderError) {
+    return (
+      <div className='text text_type_main-medium pt-4'>
+        Ошибка загрузки заказа: {orderError}
+      </div>
+    );
+  }
+
+  if (ingredientsError) {
+    return (
+      <div className='text text_type_main-medium pt-4'>
+        Ошибка загрузки ингредиентов: {ingredientsError}
+      </div>
+    );
+  }
+
+  if (!orderData) {
+    return (
+      <div className='text text_type_main-medium pt-4'>Заказ не найден</div>
+    );
+  }
+
+  if (ingredientsLoading) {
+    return <Preloader />;
+  }
+
+  if (!orderInfo) {
+    return (
+      <div className='text text_type_main-medium pt-4'>
+        Не удалось загрузить информацию об ингредиентах
+      </div>
+    );
   }
 
   return <OrderInfoUI orderInfo={orderInfo} />;

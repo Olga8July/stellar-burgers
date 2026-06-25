@@ -6,7 +6,8 @@ import {
   registerUserApi,
   updateUserApi,
   TLoginData,
-  TRegisterData
+  TRegisterData,
+  logoutApi
 } from '@api';
 import { setCookie, deleteCookie } from '../../utils/cookie';
 
@@ -45,8 +46,9 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem('refreshToken', res.refreshToken);
       setCookie('accessToken', res.accessToken);
       return res.user;
-    } catch (err: any) {
-      return rejectWithValue(err.message || 'Ошибка входа');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Ошибка входа';
+      return rejectWithValue(message);
     }
   }
 );
@@ -59,8 +61,9 @@ export const registerUser = createAsyncThunk(
       localStorage.setItem('refreshToken', res.refreshToken);
       setCookie('accessToken', res.accessToken);
       return res.user;
-    } catch (err: any) {
-      return rejectWithValue(err.message || 'Ошибка регистрации');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Ошибка регистрации';
+      return rejectWithValue(message);
     }
   }
 );
@@ -71,8 +74,10 @@ export const updateUser = createAsyncThunk(
     try {
       const res = await updateUserApi(data);
       return res.user;
-    } catch (err: any) {
-      return rejectWithValue(err.message || 'Ошибка обновления профиля');
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Ошибка обновления профиля';
+      return rejectWithValue(message);
     }
   }
 );
@@ -80,9 +85,17 @@ export const updateUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { dispatch }) => {
-    localStorage.removeItem('refreshToken');
-    deleteCookie('accessToken');
-    dispatch(setUser(null));
+    try {
+      await logoutApi();
+      localStorage.removeItem('refreshToken');
+      deleteCookie('accessToken');
+      dispatch(setUser(null));
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+      localStorage.removeItem('refreshToken');
+      deleteCookie('accessToken');
+      dispatch(setUser(null));
+    }
   }
 );
 

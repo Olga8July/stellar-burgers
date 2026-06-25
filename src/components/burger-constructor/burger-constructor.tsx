@@ -5,8 +5,11 @@ import { useDispatch, useSelector } from '../../services/store';
 import {
   selectConstructorItems,
   selectOrderRequest,
-  selectOrderModalData
+  selectOrderModalData,
+  selectUserData,
+  selectAuthChecked
 } from '../../services/selectors/selectors';
+import { useNavigate } from 'react-router-dom';
 
 import {
   createOrder,
@@ -17,8 +20,11 @@ export const BurgerConstructor: FC = () => {
   const constructorItems = useSelector(selectConstructorItems);
   const orderRequest = useSelector(selectOrderRequest);
   const orderModalData = useSelector(selectOrderModalData) as TOrder | null;
+  const user = useSelector(selectUserData);
+  const isAuthChecked = useSelector(selectAuthChecked);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const bun = constructorItems?.bun ?? null;
   const ingredients = constructorItems?.ingredients ?? [];
@@ -35,6 +41,12 @@ export const BurgerConstructor: FC = () => {
 
   const onOrderClick = () => {
     if (!bun || orderRequest) return;
+
+    if (!isAuthChecked || !user) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
     dispatch(createOrder(orderIngredients));
   };
 

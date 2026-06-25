@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TConstructorIngredient } from '@utils-types';
+import { createOrder } from './orderSlice';
 
 type TConstructorState = {
   bun: TConstructorIngredient | null;
@@ -40,6 +41,12 @@ const constructorSlice = createSlice({
         state.ingredients[index] = temp;
       }
     }
+  },
+  extraReducers: (builder) => {
+    builder.addCase(createOrder.fulfilled, (state) => {
+      state.bun = null;
+      state.ingredients = [];
+    });
   }
 });
 
