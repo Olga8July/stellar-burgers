@@ -1,18 +1,21 @@
 import { FC } from 'react';
-import { useParams } from 'react-router-dom';
-
+import { useParams, useLocation } from 'react-router-dom';
 import { Preloader } from '../ui/preloader';
 import { IngredientDetailsUI } from '../ui/ingredient-details';
-
 import { useSelector } from '../../services/store';
 import {
   selectIngredients,
   selectIngredientsLoading,
   selectIngredientsError
 } from '../../services/selectors/selectors';
+import styles from './ingredient-details.module.css';
 
 export const IngredientDetails: FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+
+  // Если открыто как отдельная страница (не в модалке)
+  const isPage = !location.state?.background;
 
   const ingredients = useSelector(selectIngredients);
   const loading = useSelector(selectIngredientsLoading);
@@ -40,5 +43,14 @@ export const IngredientDetails: FC = () => {
     );
   }
 
-  return <IngredientDetailsUI ingredientData={ingredientData} />;
+  return (
+    <>
+      {isPage && (
+        <h2 className={`${styles.title} text text_type_main-large`}>
+          Детали ингредиента
+        </h2>
+      )}
+      <IngredientDetailsUI ingredientData={ingredientData} />
+    </>
+  );
 };
