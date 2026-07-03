@@ -1,34 +1,27 @@
 import { FC, memo, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import ReactDOM from 'react-dom';
 
 import { TModalProps } from './type';
 import { ModalUI } from '@ui';
 
-export const Modal: FC<TModalProps> = memo(({ title, onClose, children }) => {
-  const modalRoot = document.getElementById('modals');
+const modalRoot = document.getElementById('modals');
 
+export const Modal: FC<TModalProps> = memo(({ title, onClose, children }) => {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+      e.key === 'Escape' && onClose();
     };
 
     document.addEventListener('keydown', handleEsc);
-
     return () => {
       document.removeEventListener('keydown', handleEsc);
     };
   }, [onClose]);
 
-  if (!modalRoot) {
-    return null;
-  }
-
-  return createPortal(
+  return ReactDOM.createPortal(
     <ModalUI title={title} onClose={onClose}>
       {children}
     </ModalUI>,
-    modalRoot
+    modalRoot as HTMLDivElement
   );
 });

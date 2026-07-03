@@ -5,23 +5,21 @@ import { OrderCardProps } from './type';
 import { TIngredient } from '@utils-types';
 import { OrderCardUI } from '../ui/order-card';
 
-import { useSelector } from '../../services/store';
-import { selectIngredients } from '../../services/selectors/selectors';
-
 const maxIngredients = 6;
 
 export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
   const location = useLocation();
 
-  const ingredients = useSelector(selectIngredients);
+  /** TODO: взять переменную из стора */
+  const ingredients: TIngredient[] = [];
 
   const orderInfo = useMemo(() => {
+    if (!ingredients.length) return null;
+
     const ingredientsInfo = order.ingredients.reduce(
       (acc: TIngredient[], item: string) => {
         const ingredient = ingredients.find((ing) => ing._id === item);
-        if (ingredient) {
-          return [...acc, ingredient];
-        }
+        if (ingredient) return [...acc, ingredient];
         return acc;
       },
       []
@@ -37,7 +35,6 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
         : 0;
 
     const date = new Date(order.createdAt);
-
     return {
       ...order,
       ingredientsInfo,
@@ -47,6 +44,8 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
       date
     };
   }, [order, ingredients]);
+
+  if (!orderInfo) return null;
 
   return (
     <OrderCardUI

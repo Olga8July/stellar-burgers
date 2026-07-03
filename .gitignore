@@ -2,13 +2,3 @@ node_modules
 .env
 .idea
 dist
-
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
-
-# Test coverage (Jest)
-coverage/
